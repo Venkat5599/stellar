@@ -13,7 +13,7 @@ import {
   recognizeNote,
   nullifierHash,
   stealthSeed,
-  addressToField,
+  recipientField,
   MerkleTree,
 } from "../sdk/veil.ts";
 
@@ -43,7 +43,7 @@ console.log("recipient recognised note ✓");
 // 5. Recipient derives a one-time stealth Stellar payout address.
 const seed = stealthSeed(meta.scanPriv, note.ephemeralPub);
 const stealthKp = Keypair.fromRawEd25519Seed(Buffer.from(seed));
-const recipientField = addressToField(stealthKp.rawPublicKey());
+const recipient = recipientField(stealthKp.publicKey());
 console.log(`stealth payout address = ${stealthKp.publicKey()}`);
 
 // 6. Build the withdraw witness from the real tree proof.
@@ -52,7 +52,7 @@ const nh = await nullifierHash(found.nullifier);
 const input = {
   root: String(root),
   nullifierHash: String(nh),
-  recipient: String(recipientField),
+  recipient: String(recipient),
   amount: String(AMOUNT),
   secret: String(found.secret),
   nullifier: String(found.nullifier),
