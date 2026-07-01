@@ -38,7 +38,7 @@ console.log(`note inserted at leaf ${idx}, root = ${tree.root()}`);
 // 4. Recipient scans the announcement and recognises the note.
 const found = await recognizeNote(meta.scanPriv, note.ephemeralPub, AMOUNT, note.commitment);
 if (!found) throw new Error("recipient failed to recognise its own note");
-console.log("recipient recognised note ✓");
+console.log("recipient recognised note OK");
 
 // 5. Recipient derives a one-time stealth Stellar payout address.
 const seed = stealthSeed(meta.scanPriv, note.ephemeralPub);

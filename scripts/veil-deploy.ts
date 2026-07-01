@@ -33,11 +33,11 @@ const inv = (args: string[]) =>
 
 // 2. init(admin, usdc=native SAC, empty_root).
 await inv(["init", "--admin", issuer, "--usdc", NATIVE_SAC, "--empty_root", m.emptyRoot]);
-console.log("init ✓");
+console.log("init OK");
 
 // 3. set_vks.
 await $`stellar contract invoke --id ${cid} --source ${SRC} --network ${NET} -- set_vks --insert_vk-file-path ${join(SDKB, "insert_vk.json")} --withdraw_vk-file-path ${join(SDKB, "withdraw_vk.json")}`;
-console.log("set_vks ✓");
+console.log("set_vks OK");
 
 // 4. Fund the stealth payout address (friendbot) so the SAC transfer reaches it.
 await fetch(`https://friendbot.stellar.org/?addr=${m.stealthAddress}`).catch(() => {});
@@ -52,7 +52,7 @@ for (let attempt = 1; ; attempt++) {
   if (attempt >= 5) throw new Error(`deposit failed after ${attempt} attempts:\n${r.stderr}`);
   console.log(`  deposit attempt ${attempt} hit RPC lag, retrying…`);
 }
-console.log("deposit ✓ (insert proof verified on-chain, USDC pulled)");
+console.log("deposit OK (insert proof verified on-chain, USDC pulled)");
 
 const root = (await inv(["current_root"]).text()).trim();
 const count = (await inv(["leaf_count"]).text()).trim();
@@ -60,14 +60,14 @@ console.log(`  current_root = ${root}  leaf_count = ${count}`);
 
 // 6. withdraw(proof, root, nullifier_hash, to=stealth, amount).
 await $`stellar contract invoke --id ${cid} --source ${SRC} --network ${NET} -- withdraw --proof-file-path ${join(SDKB, "e2e_withdraw_proof.json")} --root ${m.newRoot} --nullifier_hash ${m.nullifierHash} --to ${m.stealthAddress} --amount ${m.amount}`;
-console.log("withdraw ✓ (membership proof verified, paid to stealth address)");
+console.log("withdraw OK (membership proof verified, paid to stealth address)");
 
 // 7. Double-spend: same nullifier must be rejected.
 const dbl = await $`stellar contract invoke --id ${cid} --source ${SRC} --network ${NET} -- withdraw --proof-file-path ${join(SDKB, "e2e_withdraw_proof.json")} --root ${m.newRoot} --nullifier_hash ${m.nullifierHash} --to ${m.stealthAddress} --amount ${m.amount}`.nothrow();
 if (dbl.exitCode !== 0) {
-  console.log("double-spend rejected ✓ (NullifierUsed)");
+  console.log("double-spend rejected OK (NullifierUsed)");
 } else {
-  console.log("⚠ double-spend NOT rejected — investigate");
+  console.log("WARNING: double-spend NOT rejected — investigate");
 }
 
 console.log("\nVEIL e2e complete on testnet.");

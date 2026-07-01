@@ -40,7 +40,8 @@ const stealthKp = Keypair.fromRawEd25519Seed(Buffer.from(stealthSeed(meta.scanPr
 const recipient = recipientField(stealthKp.publicKey());
 const nh = await nullifierHash(found.nullifier);
 
-// INSERT witness: emptyRoot -> newRoot appends the commitment at leaf 0.
+// INSERT witness: emptyRoot -> newRoot appends the commitment at leaf 0, and
+// binds `amount` to the commitment (commitment == Poseidon(amount, secret, nullifier)).
 writeFileSync(
   join(BUILD, "input_e2e_insert.json"),
   JSON.stringify({
@@ -48,6 +49,9 @@ writeFileSync(
     newRoot: String(newRoot),
     commitment: String(note.commitment),
     leafIndex: String(leafIndex),
+    amount: String(AMOUNT),
+    secret: String(note.secret),
+    nullifier: String(note.nullifier),
     pathElements: pathElements.map(String),
   }),
 );
